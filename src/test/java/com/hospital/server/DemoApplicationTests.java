@@ -1,4 +1,4 @@
-package com.hospitalserver.demo;
+package com.hospital.server;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
