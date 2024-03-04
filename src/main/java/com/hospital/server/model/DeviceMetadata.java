@@ -1,7 +1,9 @@
 package com.hospital.server.model;
 
-public class DeviceMetadata {
+// TODO: There should be two types of metadata, for now we just have one type
 
+public class DeviceMetadata {
+// TODO: change the fields that we will have here to whatever we are actually using
     private String id;
     private String name;
     private long timestamp;
