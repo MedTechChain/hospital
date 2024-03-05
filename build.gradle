@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
-	id 'com.google.protobuf' version '0.9.4'
+//	id 'com.google.protobuf' version '0.9.4'
 
 }
 
@@ -22,11 +22,19 @@ ext {
 	set('springCloudVersion', "2023.0.0")
 }
 
+
+configurations {
+	developmentOnly
+	runtimeClasspath {
+		extendsFrom developmentOnly
+	}
+}
+
 dependencies {
 	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.25.3'
+//	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.25.3'
 	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util
-	implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.25.3'
+//	implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.25.3'
 
 	implementation 'com.h2database:h2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
