@@ -1,6 +1,5 @@
-FROM openjdk:17-jdk-slim
+FROM openjdk:21-jdk-slim
 MAINTAINER "Sven"
 
-RUN ./gradlew build
-
-CMD ["ls"]
+#CMD ["ls"]
+CMD ["java", "-cp", "hospital-server.main", "com.hospital.server.DemoApplication"]
