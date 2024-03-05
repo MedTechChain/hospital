@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO: add tests for API
 // TODO: create API documentation, and two endpoints for two types of metadata
-// TODO: integrate protobuf library for java
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceMetadataController {
     private final List<DeviceMetadata> devices = new ArrayList<>();
 
-//
+    //
     @PostMapping
     public ResponseEntity<DeviceMetadata> addDevice(@RequestBody DeviceMetadata deviceMetadata) {
         devices.add(deviceMetadata);

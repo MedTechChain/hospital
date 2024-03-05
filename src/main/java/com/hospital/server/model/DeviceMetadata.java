@@ -4,42 +4,14 @@ package com.hospital.server.model;
 
 public class DeviceMetadata {
 // TODO: change the fields that we will have here to whatever we are actually using
-    private String id;
-    private String name;
-    private long timestamp;
-    private String location;
+    private String version;
 
     // Getters
-    public String getId() {
-        return id;
+    public String getVersion() {
+        return version;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public long getTimestamp() {
-        return timestamp;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
     // Setters
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

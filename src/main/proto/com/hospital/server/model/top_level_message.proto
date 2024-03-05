@@ -1,0 +1,46 @@
+// [START declaration]
+syntax = "proto3";
+
+option java_package = "com.hospital.server.model";
+//option java_outer_classname = "OuterSample";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+message BedsideMonitor {
+  string device_manufacturer = 1;  // Reference to patient number
+  string device_type = 2;
+  int32 software_version = 3;
+  google.protobuf.Timestamp timestamp = 4;
+
+  bool has_ecg_module= 5;
+  bool has_resp_module= 6;
+  bool has_spo2_module= 7;
+  bool has_nibp_module= 8;
+  bool has_temp_module= 9;
+  bool has_2_channel_invbp_module= 10;
+  bool has_sidestream_co2_module= 11;
+  bool has_entropy_module= 12;
+  bool has_sidestream_n2o_module= 13;
+  bool has_neuromuscular_transmission_module= 14;
+  bool has_cardiac_output_module= 15;
+
+}
+
+message WearableDevice {
+  string device_serial_number = 1;
+  string udi_device_name = 2;  // Reference to patient number
+  string software_version = 3;
+
+  google.protobuf.Timestamp timestamp = 4;
+
+  bool has_heart_rate_sensor = 5;
+  bool has_accelerometer = 6;
+  bool has_gyroscope = 7;
+  bool has_barometric = 8;
+  bool has_microphone = 9;
+  bool has_magnetometer = 10;
+  bool has_temperature_sensor = 11;
+  bool has_gps = 12;
+
+}
