@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.hyperledger.fabric.client.Contract;
+import org.hyperledger.fabric.client.Gateway;
+import org.hyperledger.fabric.client.GatewayException;
+import org.hyperledger.fabric.client.Network;
+import org.springframework.core.env.Environment;
+
 import java.util.ArrayList;
 import java.util.List;
 

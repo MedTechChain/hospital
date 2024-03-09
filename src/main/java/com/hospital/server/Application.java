@@ -12,23 +12,23 @@ import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Random;
 
 @SpringBootApplication
-public class DemoApplication {
+public class Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(DemoApplication.class, args);
-
+		SpringApplication.run(Application.class, args);
+	// this.constract.submitTransaction("CreateWatch", uuid.random.String, version);
 		// Array of predefined versions
 		String[] versions = {
-				"{ \"version\": \"1.2.1\" }",
-				"{ \"version\": \"1.2.2\" }",
-				"{ \"version\": \"1.2.3\" }",
-				"{ \"version\": \"1.3.0\" }",
-				"{ \"version\": \"1.3.1\" }",
-				"{ \"version\": \"1.4.0\" }",
-				"{ \"version\": \"1.4.1\" }",
-				"{ \"version\": \"1.4.2\" }",
-				"{ \"version\": \"1.5.0\" }",
-				"{ \"version\": \"1.5.1\" }"
+				"{ \"version\": \"v1.2.1\" }",
+				"{ \"version\": \"v1.2.2\" }",
+				"{ \"version\": \"v1.2.3\" }",
+				"{ \"version\": \"v1.3.0\" }",
+				"{ \"version\": \"v1.3.1\" }",
+				"{ \"version\": \"v1.4.0\" }",
+				"{ \"version\": \"v1.4.1\" }",
+				"{ \"version\": \"v1.4.2\" }",
+				"{ \"version\": \"v1.5.0\" }",
+				"{ \"version\": \"v1.5.1\" }"
 		};
 
 		Random random = new Random();

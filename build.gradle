@@ -3,7 +3,6 @@ plugins {
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
 //	id 'com.google.protobuf' version '0.9.4'
-
 }
 
 group = 'com.hospitalserver'
@@ -31,17 +30,25 @@ configurations {
 }
 
 dependencies {
+	// Protobuf
 	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
 //	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.25.3'
 	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util
 //	implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.25.3'
 
+	// H2 for testing
 	implementation 'com.h2database:h2'
+
+	// Chaincode
+	implementation 'org.hyperledger.fabric:fabric-gateway:1.4.0'
+	compileOnly 'io.grpc:grpc-api:1.59.0'
+	implementation 'io.grpc:grpc-netty-shaded:1.59.0'
+
+	// Springboot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-//	TODO: replace this gateway with the actual Hyperledger Fabric Gateway client API we need
-	implementation 'org.springframework.cloud:spring-cloud-starter-gateway-mvc'
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
 }
