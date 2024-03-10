@@ -44,7 +44,12 @@ curl --location --request POST 'http://localhost:8080/api/devices' \
 
 `201 CREATED`
 
-This request does not return any response body.
+```json
+{
+  "uuid": "123e4567-e89b-12d3-a456-426614174000",
+  "version": "v1.2.1"
+}
+```
 
 -----
 
