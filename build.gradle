@@ -44,6 +44,9 @@ dependencies {
 	compileOnly 'io.grpc:grpc-api:1.59.0'
 	implementation 'io.grpc:grpc-netty-shaded:1.59.0'
 
+	// Jackson for JSON parsing
+	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.16.1'
+
 	// Springboot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 //	implementation 'org.springframework.boot:spring-boot-starter-security'
