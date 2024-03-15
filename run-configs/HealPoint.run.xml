@@ -1,16 +1,16 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="HealPoint" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
     <envs>
-      <env name="CERT_DIR_PATH" value="users/User1@healpoint.nl/msp/signcerts" />
+      <env name="CERT_DIR_PATH" value="./msp/signcerts" />
       <env name="CHAINCODE_NAME" value="medtechchain" />
       <env name="CHANNEL_NAME" value="medtechchain" />
-      <env name="CRYPTO_PATH" value="../dev-tools/fabric/.generated/crypto/peerOrganizations/healpoint.nl" />
-      <env name="KEY_DIR_PATH" value="users/User1@healpoint.nl/msp/keystore" />
+      <env name="CRYPTO_PATH" value="./crypto/healpoint.nl" />
+      <env name="KEY_DIR_PATH" value="./msp/keystore" />
       <env name="MSP_ID" value="HealPointPeerMSP" />
       <env name="OVERRIDE_AUTH" value="peer0.healpoint.nl" />
       <env name="PEER_ENDPOINT" value="localhost:8051" />
       <env name="SMART_CONTRACT_NAME" value="medtechchain" />
-      <env name="TLS_CERT_PATH" value="users/User1@healpoint.nl/tls/ca.crt" />
+      <env name="TLS_CERT_PATH" value="./tls/ca.crt" />
     </envs>
     <module name="hospital-server.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.hospital.server.Application" />
