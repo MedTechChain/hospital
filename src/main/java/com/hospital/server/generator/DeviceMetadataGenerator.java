@@ -26,21 +26,39 @@ public class DeviceMetadataGenerator {
             "v1.5.1"
     };
 
-    private final Random random = new Random();
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
+    private final Random random;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public void generateAndSendPayloads(String endpointUri) {
-        while (true) {
+    /**
+     * Constructor for DeviceMetadataGenerator.
+     *
+     * @param client    the HTTP client to use for sending requests
+     * @param random    the random number generator for version selection
+     */
+    public DeviceMetadataGenerator(HttpClient client, Random random) {
+        this.client = client;
+        this.random = random;
+    }
+
+    /**
+     * Generates and sends a specified number of device metadata payloads to the given endpoint URI.
+     * Each payload is unique, with a randomly selected version and a new UUID.
+     *
+     * @param endpointUri       the URI of the endpoint to send payloads to
+     * @param numberOfPayloads  the number of payloads to generate and send
+     */
+    public void generateAndSendPayloads(String endpointUri, int numberOfPayloads) {
+        for (int i = 0; i < numberOfPayloads; i++) {
             try {
                 // Serialization into JSON using Jackson
-                DeviceMetadata payload = new DeviceMetadata();
-
                 // Generate a random UUID for each device/version combination
-                payload.setUuid(UUID.randomUUID().toString());
+                String uuid = UUID.randomUUID().toString();
 
                 // Select a random version from the array
-                payload.setVersion(versions[random.nextInt(versions.length)]);
+                String version = versions[random.nextInt(versions.length)];
+
+                DeviceMetadata payload = new DeviceMetadata(uuid, version);
 
                 // Convert the DeviceMetadata object to a JSON string
                 String json = objectMapper.writeValueAsString(payload);

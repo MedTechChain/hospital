@@ -70,7 +70,7 @@ public class DeviceMetadataController {
     public ResponseEntity<DeviceMetadata> addDevice(@RequestBody DeviceMetadata deviceMetadata) throws GatewayException, CommitException {
 
         // Extract UUID and version from the deviceMetadata object
-        String uuid = deviceMetadata.getUuid();
+        String uuid = deviceMetadata.getUUID();
         String version = deviceMetadata.getVersion();
 
         // Submit the transaction to the blockchain

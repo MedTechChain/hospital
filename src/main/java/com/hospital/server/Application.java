@@ -5,6 +5,9 @@ import com.hospital.server.generator.DeviceMetadataGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.net.http.HttpClient;
+import java.util.Random;
+
 @SpringBootApplication
 public class Application {
 
@@ -12,7 +15,10 @@ public class Application {
 		SpringApplication.run(Application.class, args);
 
 		// Generate metadata to simulate devices in the hospital
-		DeviceMetadataGenerator generator = new DeviceMetadataGenerator();
-		generator.generateAndSendPayloads("http://localhost:8080/api/devices");
+		Random random = new Random();
+		HttpClient client = HttpClient.newHttpClient();
+		DeviceMetadataGenerator generator = new DeviceMetadataGenerator(client, random);
+		int numberOfPayloads = 100;
+		generator.generateAndSendPayloads("http://localhost:8080/api/devices", numberOfPayloads);
 	}
 }
