@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 public class DeviceMetadataTest {
 
     private DeviceMetadata device;
-    String uuid = UUID.randomUUID().toString();
+    String uuid = "dd8cd1e2-2539-423c-a7c0-504c4d38b04e";
     String version = "v1.2.3";
 
     @BeforeEach
@@ -31,9 +31,8 @@ public class DeviceMetadataTest {
 
     @Test
     public void testSetUUID() {
-        String testUUID = UUID.randomUUID().toString();
-        device.setUUID(testUUID);
-        Assertions.assertThat(device.getUUID()).isEqualTo(testUUID);
+        device.setUUID("22df97f0-5a0f-43e1-8b18-0ad290fd32c2");
+        Assertions.assertThat(device.getUUID()).isEqualTo("22df97f0-5a0f-43e1-8b18-0ad290fd32c2");
     }
 
     @Test
