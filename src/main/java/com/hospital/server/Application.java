@@ -14,14 +14,6 @@ import java.util.Random;
 public class Application {
 
 	public static void main(String[] args) throws JsonProcessingException {
-		Environment environment = SpringApplication.run(Application.class, args).getEnvironment();
-
-		if (Objects.equals(environment.getProperty("gateway.mock"), "true")) {
-			System.out.println("Testing environment");
-		} else {
-			System.out.println("Not testing rn");
-		}
-
 		// Generate metadata to simulate devices in the hospital
 		Random random = new Random();
 		HttpClient client = HttpClient.newHttpClient();
