@@ -2,6 +2,8 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.2.3'
 	id 'io.spring.dependency-management' version '1.1.4'
+	id 'checkstyle'
+	id 'jacoco'
 //	id 'com.google.protobuf' version '0.9.4'
 }
 
@@ -21,12 +23,17 @@ ext {
 	set('springCloudVersion', "2023.0.0")
 }
 
-
 configurations {
 	developmentOnly
 	runtimeClasspath {
 		extendsFrom developmentOnly
 	}
+}
+
+checkstyle {
+	toolVersion '10.13.0'
+	configDirectory = file("${rootDir}/config/checkstyle")
+	configFile = file("${rootDir}/config/checkstyle/checkstyle.xml")
 }
 
 dependencies {
@@ -69,8 +76,48 @@ dependencyManagement {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
 }
+//
+//tasks.named('test') {
+//	useJUnitPlatform()
+//}
 
-tasks.named('test') {
+test {
 	useJUnitPlatform()
+	jacoco {
+		enabled = true
+		includes = ['com.hospital.server.*']
+		excludes = []
+	}
+	finalizedBy jacocoTestReport // report is always generated after tests run
 }
 
+jacocoTestCoverageVerification() {
+	dependsOn test
+	violationRules {
+		rule {
+			enabled = true
+			element = 'CLASS'
+			includes = ['com.hospital.server.*']
+
+			limit {
+				counter = 'BRANCH'
+				value = 'COVEREDRATIO'
+			}
+		}
+	}
+}
+
+jacocoTestReport {
+	// (https://docs.gradle.org/current/userguide/jacoco_plugin.html)
+	// Responsible for aggregating the code coverage reports
+	dependsOn {
+		test
+		jacocoTestCoverageVerification
+	}
+	// Output html and csv (used to extract coverage percentage)
+	reports {
+		xml.required = false
+		csv.required = true
+		html.required = true
+	}
+}
