@@ -9,7 +9,7 @@ import java.util.Random;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// TODO: rename package to nl.tudelft.medtechchain
+// TODO: rename package to nl.medtechchain
 // TODO: Github workflow
 // TODO: lombok java
 // TODO: use application.properties as much as possible

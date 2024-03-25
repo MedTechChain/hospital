@@ -7,7 +7,8 @@
 Before running the service (IDE or Docker), make sure to copy the crypto 
 material required for the integration with Fabric infrastructure.
 
-Use the `scripts/load-crypto.sh` script to automatically copy the crypto material.
+Use the `scripts/copy-crypto.sh` script to copy the crypto material.
+Use the `scripts/copy-protos.sh` script to copy the proto jar.
 
 ## Build
 ```shell

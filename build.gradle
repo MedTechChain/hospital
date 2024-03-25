@@ -17,6 +17,9 @@ java {
 repositories {
 	mavenCentral()
 	google()
+	flatDir {
+		dirs 'libs'
+	}
 }
 
 ext {
@@ -61,6 +64,8 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
+
+	implementation ':medtechchain.protos:0.0.1'
 
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
