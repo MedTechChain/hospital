@@ -1,10 +1,8 @@
 package com.hospital.server.controller;
 
-import com.hospital.server.model.DeviceMetadata;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.protobuf.util.JsonFormat;
+import nl.medtechchain.protos.devicemetadata.EncryptedPortableDeviceMetadata;
+import nl.medtechchain.protos.devicemetadata.EncryptedWearableDeviceMetadata;
 import org.hyperledger.fabric.client.*;
 
 import jakarta.annotation.PreDestroy;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceMetadataController {
-    private final List<DeviceMetadata> devices = new ArrayList<>();
 
     private final Gateway gateway;
     private final Contract contract;
@@ -55,42 +52,28 @@ public class DeviceMetadataController {
         System.out.println("Successfully closed the gateway");
     }
 
-    // TODO: what happens when data is not successfully committed to the blockchain, or when many devices are trying to access the API
-    /**
-     * Adds a new device metadata to the blockchain. Handles POST requests from devices in the hospital,
-     * extracts UUID and version, and submits it to the blockchain using the gateway and contract.
-     *
-     * @param deviceMetadata        the device metadata to be pushed to the blockchain.
-     * @return ResponseEntity       containing the added device metadata and HTTP status.
-     * @throws GatewayException     indicates a problem with the fabric gateway.
-     * @throws CommitException      indicates a problem with committing the transaction to the blockchain.
-     */
-    @PostMapping
+    @PostMapping("/portable")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<DeviceMetadata> addDevice(@RequestBody DeviceMetadata deviceMetadata) throws GatewayException, CommitException {
+    public ResponseEntity<?> addPortableDevice(@RequestBody String jsonDeviceMetadata) throws Exception {
+        EncryptedPortableDeviceMetadata deviceMetadata;
+        try {
+            EncryptedPortableDeviceMetadata.Builder builder = EncryptedPortableDeviceMetadata.newBuilder();
+            JsonFormat.parser().merge(jsonDeviceMetadata, builder);
+            deviceMetadata = builder.build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid device metadata format");
+        }
 
-        // Extract UUID and version from the deviceMetadata object
-        String uuid = deviceMetadata.getUUID();
-        String version = deviceMetadata.getVersion();
+        // Serialize the protobuf object back to a JSON string for the chaincode
+        String jsonString = JsonFormat.printer().print(deviceMetadata);
 
-        // Submit the transaction to the blockchain
-        // TODO: transactionResult is unused
-        byte[] transactionResult = contract.submitTransaction("CreateWatch", uuid, version);
+        String deviceType = "0"; // 0=PORTABLE_DEVICE, 1=WEARABLE_DEVICE
 
-        // Save device metadata in local list
-        devices.add(deviceMetadata);
+        String udi = deviceMetadata.getUdi();
+        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, deviceType, jsonString);
 
-        // Respond with the added device metadata and a status of CREATED
-        return new ResponseEntity<>(deviceMetadata, HttpStatus.CREATED);
-    }
+        System.out.println(new String(transactionResult));
 
-    /**
-     * Retrieves all device metadata entries.
-     *
-     * @return ResponseEntity       containing the list of all device metadata and HTTP status.
-     */
-    @GetMapping
-    public ResponseEntity<List<DeviceMetadata>> getAllDevices() {
-        return ResponseEntity.ok(devices);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 }

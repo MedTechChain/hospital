@@ -9,7 +9,7 @@
       <env name="MSP_ID" value="HealPointPeerMSP" />
       <env name="OVERRIDE_AUTH" value="peer0.healpoint.nl" />
       <env name="PEER_ENDPOINT" value="localhost:8051" />
-      <env name="SMART_CONTRACT_NAME" value="medtechchain" />
+      <env name="SMART_CONTRACT_NAME" value="devicemetadata" />
       <env name="TLS_CERT_PATH" value="./tls/ca.crt" />
     </envs>
     <module name="hospital.main" />

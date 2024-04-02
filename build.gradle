@@ -4,7 +4,6 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.4'
 	id 'checkstyle'
 	id 'jacoco'
-//	id 'com.google.protobuf' version '0.9.4'
 }
 
 group = 'com.hospitalserver'
@@ -41,10 +40,9 @@ checkstyle {
 
 dependencies {
 	// Protobuf
-	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
-//	implementation group: 'com.google.protobuf', name: 'protobuf-java', version: '3.25.3'
-	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java-util
-//	implementation group: 'com.google.protobuf', name: 'protobuf-java-util', version: '3.25.3'
+	implementation 'com.google.protobuf:protobuf-java:3.25.3'
+	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
+	implementation ':medtechchain.protos:0.0.1'
 
 	// H2 for testing
 	implementation 'com.h2database:h2'
@@ -55,7 +53,10 @@ dependencies {
 	implementation 'io.grpc:grpc-netty-shaded:1.59.0'
 
 	// Jackson for JSON parsing
-	implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.16.1'
+	implementation 'com.fasterxml.jackson.core:jackson-core:2.17.0'
+	implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.0'
+	implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 
 	// Springboot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -64,8 +65,6 @@ dependencies {
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 //	testImplementation 'org.springframework.security:spring-security-test'
-
-	implementation ':medtechchain.protos:0.0.1'
 
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

@@ -9,10 +9,10 @@
       <env name="MSP_ID" value="MediValePeerMSP" />
       <env name="OVERRIDE_AUTH" value="peer0.medivale.nl" />
       <env name="PEER_ENDPOINT" value="localhost:9051" />
-      <env name="SMART_CONTRACT_NAME" value="medtechchain" />
+      <env name="SMART_CONTRACT_NAME" value="devicemetadata" />
       <env name="TLS_CERT_PATH" value="./tls/ca.crt" />
     </envs>
-    <module name="hospital-server.main" />
+    <module name="hospital.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="com.hospital.server.Application" />
     <method v="2">
       <option name="Make" enabled="true" />

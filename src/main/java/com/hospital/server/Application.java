@@ -26,22 +26,8 @@ public class Application {
 		Random random = new Random();
 		HttpClient client = HttpClient.newHttpClient();
 
-		// Fetch an encryption key from the trusted third party
-		KeyService ks = new KeyService(client);
-		try {
-			String key = ks.fetchKey();
-			if (key == null || key.isBlank()) {
-				throw new RuntimeException("No Key received from the server.");
-			}
-			System.out.println("Received Key: " + key);
-		} catch (IOException | InterruptedException e) {
-			throw new RuntimeException("Failed to retrieve Key", e);
-		}
-
 		DeviceMetadataGenerator generator = new DeviceMetadataGenerator(client, random);
 
-		// For testing, it is better to put this lower unless you want to wait 10 hours.
-		int numberOfPayloads = 1;
-		generator.generateAndSendPayloads("http://localhost:8080/api/devices", numberOfPayloads);
+		generator.generateAndSendPayloads("http://localhost:8080/api/devices/portable");
 	}
 }
