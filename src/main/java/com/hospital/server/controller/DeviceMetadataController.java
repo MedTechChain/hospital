@@ -1,8 +1,13 @@
 package com.hospital.server.controller;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.util.JsonFormat;
+import nl.medtechchain.protos.devicemetadata.DeviceType;
+import nl.medtechchain.protos.devicemetadata.EncryptedDeviceMetadata;
 import nl.medtechchain.protos.devicemetadata.EncryptedPortableDeviceMetadata;
 import nl.medtechchain.protos.devicemetadata.EncryptedWearableDeviceMetadata;
+import nl.medtechchain.protos.encryption.EncryptionKeyMetadata;
+import nl.medtechchain.protos.encryption.EncryptionSchemeType;
 import org.hyperledger.fabric.client.*;
 
 import jakarta.annotation.PreDestroy;
@@ -16,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import java.util.UUID;
 
 // TODO: add tests for API
 // TODO: create two endpoints for two types of metadata
@@ -56,6 +63,8 @@ public class DeviceMetadataController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addPortableDevice(@RequestBody String jsonDeviceMetadata) throws Exception {
         EncryptedPortableDeviceMetadata deviceMetadata;
+
+        // Check if the json body is valid protobuf format for this device type
         try {
             EncryptedPortableDeviceMetadata.Builder builder = EncryptedPortableDeviceMetadata.newBuilder();
             JsonFormat.parser().merge(jsonDeviceMetadata, builder);
@@ -63,16 +72,61 @@ public class DeviceMetadataController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Invalid device metadata format");
         }
+        // Convert protobuf metadata object to byte array
+        byte[] deviceBytes = deviceMetadata.toByteArray();
+
+        // Wrap specific device metadata in general device metadata object
+        // Stores device type, raw bytes, and metadata about encryption key
+        EncryptedDeviceMetadata wrappedDeviceMetadata = EncryptedDeviceMetadata.newBuilder()
+                .setType(DeviceType.PORTABLE_DEVICE)
+                .setRawBytes(ByteString.copyFrom(deviceBytes))
+                .setEncryptionKeyMetadata(EncryptionKeyMetadata.newBuilder()
+                        .setScheme(EncryptionSchemeType.PAILLIER_2048)
+                        .setId(UUID.randomUUID().toString())
+                        .build())
+                .build();
 
         // Serialize the protobuf object back to a JSON string for the chaincode
-        String jsonString = JsonFormat.printer().print(deviceMetadata);
-
-        String deviceType = "0"; // 0=PORTABLE_DEVICE, 1=WEARABLE_DEVICE
+        String jsonString = JsonFormat.printer().includingDefaultValueFields().print(wrappedDeviceMetadata);
 
         String udi = deviceMetadata.getUdi();
-        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, deviceType, jsonString);
+        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.PORTABLE_DEVICE.toString(), jsonString);
 
-        System.out.println(new String(transactionResult));
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/wearable")
+    @ResponseStatus(HttpStatus.CREATED)
+    public ResponseEntity<?> addWearableDevice(@RequestBody String jsonDeviceMetadata) throws Exception {
+        EncryptedWearableDeviceMetadata deviceMetadata;
+
+        // Check if the json body is valid protobuf format for this device type
+        try {
+            EncryptedWearableDeviceMetadata.Builder builder = EncryptedWearableDeviceMetadata.newBuilder();
+            JsonFormat.parser().merge(jsonDeviceMetadata, builder);
+            deviceMetadata = builder.build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Invalid device metadata format");
+        }
+        // Convert protobuf metadata object to byte array
+        byte[] deviceBytes = deviceMetadata.toByteArray();
+
+        // Wrap specific device metadata in general device metadata object
+        // Stores device type, raw bytes, and metadata about encryption key
+        EncryptedDeviceMetadata wrappedDeviceMetadata = EncryptedDeviceMetadata.newBuilder()
+                .setType(DeviceType.WEARABLE_DEVICE)
+                .setRawBytes(ByteString.copyFrom(deviceBytes))
+                .setEncryptionKeyMetadata(EncryptionKeyMetadata.newBuilder()
+                        .setScheme(EncryptionSchemeType.PAILLIER_2048)
+                        .setId(UUID.randomUUID().toString())
+                        .build())
+                .build();
+
+        // Serialize the protobuf object back to a JSON string for the chaincode
+        String jsonString = JsonFormat.printer().includingDefaultValueFields().print(wrappedDeviceMetadata);
+
+        String udi = deviceMetadata.getUdi();
+        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.WEARABLE_DEVICE.toString(), jsonString);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
