@@ -23,7 +23,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 //
 //    public static final String DEVICE_API = "/api/devices";
 //
-//    private final DeviceMetadata testDevice = new DeviceMetadata("dd8cd1e2-2539-423c-a7c0-504c4d38b04e", "v1.2.3");
+//    private final DeviceMetadata testDevice =
+//    new DeviceMetadata("dd8cd1e2-2539-423c-a7c0-504c4d38b04e", "v1.2.3");
 //
 //    @Test
 //    void testAddDeviceSuccessful() throws Exception {

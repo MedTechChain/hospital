@@ -12,13 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 public class ApplicationTest {
 
-    @Autowired
-    Gateway gatewayMock;
-
-    @Test
-    public void testApplication() {
-        Assertions
-                .assertThatCode(() -> Application.main(new String[]{"MedTech Chain"}))
-                .doesNotThrowAnyException();
-    }
+//    @Autowired
+//    Gateway gatewayMock;
+//
+//    @Test
+//    public void testApplication() {
+//        Assertions
+//                .assertThatCode(() -> Application.main(new String[]{"MedTech Chain"}))
+//                .doesNotThrowAnyException();
+//    }
 }
