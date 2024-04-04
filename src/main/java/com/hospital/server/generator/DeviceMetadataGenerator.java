@@ -64,7 +64,7 @@ public class DeviceMetadataGenerator {
             String endpoint = endpointUri;
             // Random data
             int deviceType = random.nextInt(2);
-            int delay = random.nextInt(1, 61);
+            int delay = random.nextInt(1, 5);
             int speciality = random.nextInt(4);
             int manufacturer = random.nextInt(4);
             int operatingSystem = random.nextInt(1, 11);
