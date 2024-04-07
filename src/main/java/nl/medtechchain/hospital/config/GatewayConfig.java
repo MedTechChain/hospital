@@ -1,4 +1,4 @@
-package com.hospital.server.config;
+package nl.medtechchain.hospital.config;
 
 import io.grpc.ChannelCredentials;
 import io.grpc.Grpc;

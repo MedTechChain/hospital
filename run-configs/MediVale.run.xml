@@ -13,7 +13,7 @@
       <env name="TLS_CERT_PATH" value="./tls/ca.crt" />
     </envs>
     <module name="hospital.main" />
-    <option name="SPRING_BOOT_MAIN_CLASS" value="com.hospital.server.Application" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="nl.medtechchain.hospital.Application" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

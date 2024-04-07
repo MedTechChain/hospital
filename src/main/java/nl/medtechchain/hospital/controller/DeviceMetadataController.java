@@ -1,4 +1,4 @@
-package com.hospital.server.controller;
+package nl.medtechchain.hospital.controller;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.util.JsonFormat;
@@ -9,13 +9,10 @@ import nl.medtechchain.protos.devicemetadata.EncryptedWearableDeviceMetadata;
 import nl.medtechchain.protos.encryption.EncryptionKeyMetadata;
 import nl.medtechchain.protos.encryption.EncryptionSchemeType;
 import org.hyperledger.fabric.client.*;
-
 import jakarta.annotation.PreDestroy;
-
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +21,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import java.util.UUID;
 
-// TODO: add tests for API
-// TODO: create two endpoints for two types of metadata
+/**
+ * Controller class for handling device metadata operations.
+ * <p>
+ * This class provides endpoints for adding portable and wearable device metadata to a blockchain ledger.
+ * It encapsulates the logic for processing incoming JSON-formatted device metadata, validating it against
+ * Google Protocol Buffers definitions, and then submitting transactions to the Hyperledger Fabric blockchain
+ * using the Fabric Gateway API.
+ */
 @RestController
 @RequestMapping("/api/devices")
 public class DeviceMetadataController {
@@ -34,10 +37,13 @@ public class DeviceMetadataController {
     private final Contract contract;
 
     /**
-     * Creates a new QueryController object, which is used for sending queries to the blockchain.
+     * Constructs a new DeviceMetadataController.
+     * <p>
+     * Initializes the controller with the necessary blockchain network and smart contract information
+     * for submitting device metadata transactions.
      *
-     * @param env               the Spring environment (to access the defined properties)
-     * @param gateway           the Fabric Gateway
+     * @param env      The Spring environment to access application properties.
+     * @param gateway  The Fabric Gateway for blockchain network interactions.
      */
     public DeviceMetadataController(Environment env, Gateway gateway) {
         this.gateway = gateway;
@@ -50,7 +56,9 @@ public class DeviceMetadataController {
     }
 
     /**
-     *  Closes the gateway before the controller is destroyed.
+     * Performs cleanup tasks before the controller is destroyed.
+     * <p>
+     * Specifically, it closes the Fabric Gateway connection to release resources.
      */
     @PreDestroy
     public void destroy() {
@@ -59,6 +67,16 @@ public class DeviceMetadataController {
         System.out.println("Successfully closed the gateway");
     }
 
+    /**
+     * Adds a new portable device metadata entry to the blockchain.
+     * <p>
+     * Accepts JSON-formatted device metadata, validates and transforms it into a blockchain transaction,
+     * and submits the transaction to add the device metadata to the ledger.
+     *
+     * @param jsonDeviceMetadata The JSON string representing the device metadata.
+     * @return A ResponseEntity indicating the outcome of the operation.
+     * @throws Exception if there is an issue processing the request or submitting the transaction.
+     */
     @PostMapping("/portable")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addPortableDevice(@RequestBody String jsonDeviceMetadata) throws Exception {
@@ -95,6 +113,16 @@ public class DeviceMetadataController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    /**
+     * Adds a new wearable device metadata entry to the blockchain.
+     * <p>
+     * Similar to the portable device endpoint, this method accepts, validates, and processes
+     * JSON-formatted wearable device metadata for submission as a blockchain transaction.
+     *
+     * @param jsonDeviceMetadata The JSON string representing the wearable device metadata.
+     * @return A ResponseEntity indicating the outcome of the operation.
+     * @throws Exception if there is an issue processing the request or submitting the transaction.
+     */
     @PostMapping("/wearable")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addWearableDevice(@RequestBody String jsonDeviceMetadata) throws Exception {
