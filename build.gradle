@@ -6,7 +6,7 @@ plugins {
 	id 'jacoco'
 }
 
-group = 'com.hospitalserver'
+group = 'nl.medtechchain.hospital'
 version = '0.0.1-SNAPSHOT'
 
 java {
@@ -89,7 +89,7 @@ test {
 	useJUnitPlatform()
 	jacoco {
 		enabled = true
-		includes = ['com.hospital.server.*']
+		includes = ['nl.medtechchain.hospital.*']
 		excludes = []
 	}
 	finalizedBy jacocoTestReport // report is always generated after tests run
@@ -101,7 +101,7 @@ jacocoTestCoverageVerification() {
 		rule {
 			enabled = true
 			element = 'CLASS'
-			includes = ['com.hospital.server.*']
+			includes = ['nl.medtechchain.hospital.*']
 
 			limit {
 				counter = 'BRANCH'
