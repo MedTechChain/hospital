@@ -13,7 +13,7 @@ services:
     environment: &env
       CHANNEL_NAME: medtechchain
       CHAINCODE_NAME: medtechchain
-      SMART_CONTRACT_NAME: medtechchain
+      SMART_CONTRACT_NAME: devicemetadata
       CRYPTO_PATH: /crypto/medivale.nl
       CERT_DIR_PATH: ./msp/signcerts
       KEY_DIR_PATH: ./msp/keystore

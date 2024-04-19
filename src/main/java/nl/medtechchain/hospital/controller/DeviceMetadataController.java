@@ -108,7 +108,7 @@ public class DeviceMetadataController {
         String jsonString = JsonFormat.printer().includingDefaultValueFields().print(wrappedDeviceMetadata);
 
         String udi = deviceMetadata.getUdi();
-        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.PORTABLE_DEVICE.toString(), jsonString);
+        contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.PORTABLE_DEVICE.toString(), jsonString);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -154,7 +154,7 @@ public class DeviceMetadataController {
         String jsonString = JsonFormat.printer().includingDefaultValueFields().print(wrappedDeviceMetadata);
 
         String udi = deviceMetadata.getUdi();
-        byte[] transactionResult = contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.WEARABLE_DEVICE.toString(), jsonString);
+        contract.submitTransaction("CreateDeviceMetadataAsset", udi, DeviceType.WEARABLE_DEVICE.toString(), jsonString);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

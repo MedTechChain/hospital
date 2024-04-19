@@ -1,13 +1,11 @@
 package nl.medtechchain.hospital.generator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -70,7 +68,7 @@ public class DeviceMetadataGenerator {
             int delay = random.nextInt(1, 6);
             int speciality = random.nextInt(4);
             int manufacturer = random.nextInt(4);
-            int operatingSystem = random.nextInt(1, 11);
+            String operatingSystem = "Linux";
             int version = random.nextInt(versions.length);
             int price = random.nextInt(100,1001);
             int usageFrequency = random.nextInt(1,11);

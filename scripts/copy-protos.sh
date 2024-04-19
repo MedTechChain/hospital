@@ -26,7 +26,7 @@ if [ ! -d "./bindings/java/build/libs/" ]; then
     error "Docker is not running"
     exit 4
   fi
-  ./build.sh
+  make javabindings-docker
 fi
 
 cd "$SCRIPT_PATH"
