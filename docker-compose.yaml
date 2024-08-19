@@ -1,75 +1,43 @@
 services:
-  medivale-hpt: &hospital
-    build: &build
+  hospital.healpoint.nl: &hospital
+    build:
       context: .
       dockerfile: Dockerfile
-      args:
-        HOSPITAL_DOMAIN: medivale.nl
     image: medtechchain/hospital
-    container_name: hospital.medivale.nl
-    profiles:
-      - light
-      - default
+    container_name: hospital.healpoint.nl
     environment: &env
+      HOSPITAL_NAME: HealPoint
       CHANNEL_NAME: medtechchain
       CHAINCODE_NAME: medtechchain
-      SMART_CONTRACT_NAME: devicemetadata
-      CRYPTO_PATH: /crypto/medivale.nl
+      DEVICE_DATA_CONTRACT_NAME: devicedata
+      CONFIG_CONTRACT_NAME: platformconfig
+      CRYPTO_PATH: /crypto/hospital.healpoint.nl
       CERT_DIR_PATH: ./msp/signcerts
       KEY_DIR_PATH: ./msp/keystore
       TLS_CERT_PATH: ./tls/ca.crt
-      MSP_ID: MediValePeerMSP
-      OVERRIDE_AUTH: peer0.medivale.nl
-      PEER_ENDPOINT: peer0.medivale.nl:7051
-    ports:
-      - "8081:8080"
-    networks:
-      - medivale
-
-  healpoint-hpt:
-    <<: *hospital
-    build:
-      <<: *build
-      args:
-        HOSPITAL_DOMAIN: healpoint.nl
-    container_name: hospital.healpoint.nl
-    profiles:
-      - default
-    environment:
-      <<: *env
-      CRYPTO_PATH: /crypto/healpoint.nl
       MSP_ID: HealPointPeerMSP
       OVERRIDE_AUTH: peer0.healpoint.nl
       PEER_ENDPOINT: peer0.healpoint.nl:7051
     ports:
-      - "8082:8080"
+      - "8081:8080"
     networks:
       - healpoint
 
-  lifecare-hpt:
+  hospital.lifecare.nl:
     <<: *hospital
-    build:
-      <<: *build
-      args:
-        HOSPITAL_DOMAIN: lifecare.nl
     container_name: hospital.lifecare.nl
-    profiles:
-      - default
     environment:
       <<: *env
-      CRYPTO_PATH: /crypto/lifecare.nl
+      CRYPTO_PATH: /crypto/hospital.lifecare.nl
       MSP_ID: LifeCarePeerMSP
       OVERRIDE_AUTH: peer0.lifecare.nl
       PEER_ENDPOINT: peer0.lifecare.nl:7051
     ports:
-      - "8083:8080"
+      - "8082:8080"
     networks:
       - lifecare
 
 networks:
-  medivale:
-    external: true
-    name: medivale
   healpoint:
     external: true
     name: healpoint

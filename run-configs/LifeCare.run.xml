@@ -4,13 +4,15 @@
       <env name="CERT_DIR_PATH" value="./msp/signcerts" />
       <env name="CHAINCODE_NAME" value="medtechchain" />
       <env name="CHANNEL_NAME" value="medtechchain" />
+      <env name="CONFIG_CONTRACT_NAME" value="platformconfig" />
       <env name="CRYPTO_PATH" value="./crypto/lifecare.nl" />
+      <env name="DEVICE_DATA_CONTRACT_NAME" value="devicedata" />
       <env name="KEY_DIR_PATH" value="./msp/keystore" />
       <env name="MSP_ID" value="LifeCarePeerMSP" />
       <env name="OVERRIDE_AUTH" value="peer0.lifecare.nl" />
       <env name="PEER_ENDPOINT" value="localhost:11051" />
-      <env name="SMART_CONTRACT_NAME" value="devicemetadata" />
       <env name="TLS_CERT_PATH" value="./tls/ca.crt" />
+      <env name="HOSPITAL_NAME" value="LifeCare" />
     </envs>
     <module name="hospital.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="nl.medtechchain.hospital.Application" />

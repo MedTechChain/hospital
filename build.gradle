@@ -39,17 +39,20 @@ checkstyle {
 }
 
 dependencies {
+	compileOnly 'org.projectlombok:lombok:1.18.34'
+	annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
 	// Protobuf
 	implementation 'com.google.protobuf:protobuf-java:3.25.3'
 	implementation 'com.google.protobuf:protobuf-java-util:3.25.3'
-	implementation ':medtechchain.protos:0.0.1'
+	implementation ':medtechchain.proto:1.0.0'
 
 	// H2 for testing
 	implementation 'com.h2database:h2'
 
 	// Chaincode
 	implementation 'org.hyperledger.fabric:fabric-gateway:1.4.0'
-	compileOnly 'io.grpc:grpc-api:1.59.0'
+	implementation 'io.grpc:grpc-api:1.59.0'
 	implementation 'io.grpc:grpc-netty-shaded:1.59.0'
 
 	// Jackson for JSON parsing
@@ -60,11 +63,9 @@ dependencies {
 
 	// Springboot
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation 'org.springframework.security:spring-security-test'
 
 	// Testing
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
