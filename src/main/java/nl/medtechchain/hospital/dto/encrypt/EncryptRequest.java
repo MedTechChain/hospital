@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EncryptRequest {
-    private String publicKey;
-    private String value;
+    private String encryptionKey;
+    private String plaintext;
 }

@@ -12,6 +12,7 @@ import org.hyperledger.fabric.client.CommitException;
 import org.hyperledger.fabric.client.CommitStatusException;
 import org.hyperledger.fabric.client.EndorseException;
 import org.hyperledger.fabric.client.SubmitException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,9 +31,12 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @RequestMapping("/api/device")
 public class DeviceMetadataController {
 
-    private final ChaincodeService chaincodeService;
+    @Value("${hospital.override-ttp-address:#{null}}")
+    private String overrideTtpAddress;
 
     private static final Logger logger = Logger.getLogger(DeviceMetadataController.class.getName());
+
+    private final ChaincodeService chaincodeService;
 
     public DeviceMetadataController(ChaincodeService chaincodeService) {
         this.chaincodeService = chaincodeService;
@@ -40,7 +44,7 @@ public class DeviceMetadataController {
 
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> addPortableDevice(@RequestBody DeviceDataDTO deviceDataDTO) {
+    public ResponseEntity<?> addPortableDevice(@RequestBody DeviceDataDTO deviceDataDTO) throws EndorseException, CommitException, SubmitException, CommitStatusException {
         var readPlatformConfigResponse = chaincodeService.getPlatformConfig();
 
         var platformConfig = readPlatformConfigResponse.getPlatformConfig();
@@ -52,16 +56,16 @@ public class DeviceMetadataController {
 
         var category = DeviceDataAsset.DeviceCategory.valueOf(deviceDataDTO.getDeviceCategory());
         if (category == DeviceDataAsset.DeviceCategory.UNRECOGNIZED || category == DeviceDataAsset.DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED)
-            return ResponseEntity.badRequest().body("Invalid speciality");
+            throw new IllegalArgumentException("Invalid device data category: " + category);
 
         var speciality = MedicalSpeciality.valueOf(deviceDataDTO.getSpeciality());
         if (speciality == MedicalSpeciality.UNRECOGNIZED || speciality == MedicalSpeciality.MEDICAL_SPECIALITY_UNSPECIFIED)
-            return ResponseEntity.badRequest().body("Invalid speciality");
+            throw new IllegalArgumentException("Invalid medical speciality: " + speciality);
 
         var hospitals = platformConfig.getParticipantConfig().getHospitalsConfigList();
         var hospital = hospitals.stream().filter(h -> h.getName().equals(deviceDataDTO.getHospital())).findFirst();
         if (hospital.isEmpty())
-            return ResponseEntity.badRequest().body("Invalid hospital name: " + deviceDataDTO.getHospital());
+            throw new IllegalArgumentException("Invalid hospital name: " + deviceDataDTO.getHospital());
 
         var hospitalIndex = hospitals.indexOf(hospital.get());
 
@@ -92,25 +96,22 @@ public class DeviceMetadataController {
         if (encryptionVersion.isPresent()) {
             assetBuilder.setEncryptionVersion(encryptionVersion.get());
 
-
             sensitiveDeviceDataBuilder
                     .setUdi(encrypt(stringToBigInteger(deviceDataDTO.getUdi()), platformConfig))
                     .setHospital(encrypt(BigInteger.valueOf(hospitalIndex), platformConfig))
                     .setSpeciality(encrypt(BigInteger.valueOf(speciality.getNumber()), platformConfig));
-        } else {
+        } else
             sensitiveDeviceDataBuilder
                     .setUdi(deviceDataDTO.getUdi())
                     .setHospital(hospital.get().getName())
                     .setSpeciality(deviceDataDTO.getSpeciality());
-        }
+
+        assetBuilder.setSensitiveDeviceData(sensitiveDeviceDataBuilder.build());
 
         var id = UUID.nameUUIDFromBytes(deviceDataDTO.getUdi().getBytes(StandardCharsets.UTF_8)).toString();
         var asset = assetBuilder.build();
-        try {
-            chaincodeService.storeDeviceData(id, asset);
-        } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            logger.severe(e.toString());
-        }
+
+        chaincodeService.storeDeviceData(id, asset);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
@@ -122,20 +123,29 @@ public class DeviceMetadataController {
         switch (platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig().getSchemeCase()) {
             case PAILLIER:
                 var paillier = platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig().getPaillier();
-                var endpoint = paillier.getTrustedThirdPartyEndpoint();
+                var address = paillier.getTrustedThirdPartyAddress();
+                if (overrideTtpAddress != null)
+                    address = overrideTtpAddress;
+
+                long startTime = System.nanoTime();
+
                 EncryptResponse encryptResponse = client.post()
-                        .uri(endpoint + "/api/paillier/encrypt")
+                        .uri("http://" + address + "/api/paillier/encrypt")
                         .contentType(APPLICATION_JSON)
                         .body(new EncryptRequest(paillier.getPublicKey(), value.toString()))
                         .retrieve()
                         .body(EncryptResponse.class);
 
+                long endTime = System.nanoTime();
+
+                long durationInMillis = (endTime - startTime) / 1_000_000;
+                logger.info("Encryption request time: " + durationInMillis + " ms");
+
                 assert encryptResponse != null;
-                return encryptResponse.getValue();
+                return encryptResponse.getCiphertext();
             default:
-                logger.severe("Scheme not set");
-                System.exit(2);
-                return null;
+                logger.severe("Encryption scheme not set in config when encryption version is present");
+                throw new IllegalStateException("Encryption scheme not set in config when encryption version is present");
         }
     }
 

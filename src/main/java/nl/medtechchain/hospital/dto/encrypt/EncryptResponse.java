@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EncryptResponse {
-    private String value;
+    private String ciphertext;
 }

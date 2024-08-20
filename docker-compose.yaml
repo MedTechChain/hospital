@@ -11,24 +11,27 @@ services:
       CHAINCODE_NAME: medtechchain
       DEVICE_DATA_CONTRACT_NAME: devicedata
       CONFIG_CONTRACT_NAME: platformconfig
-      CRYPTO_PATH: /crypto/hospital.healpoint.nl
+      CRYPTO_PATH: /crypto
       CERT_DIR_PATH: ./msp/signcerts
       KEY_DIR_PATH: ./msp/keystore
       TLS_CERT_PATH: ./tls/ca.crt
       MSP_ID: HealPointPeerMSP
       OVERRIDE_AUTH: peer0.healpoint.nl
       PEER_ENDPOINT: peer0.healpoint.nl:7051
+      HOSPITAL_GENERATION_RATE: 3000
     ports:
       - "8081:8080"
     networks:
       - healpoint
+    volumes:
+      - ./crypto/hospital.healpoint.nl:/crypto
 
   hospital.lifecare.nl:
     <<: *hospital
     container_name: hospital.lifecare.nl
     environment:
       <<: *env
-      CRYPTO_PATH: /crypto/hospital.lifecare.nl
+      CRYPTO_PATH: /crypto/lifecare.nl
       MSP_ID: LifeCarePeerMSP
       OVERRIDE_AUTH: peer0.lifecare.nl
       PEER_ENDPOINT: peer0.lifecare.nl:7051
@@ -36,6 +39,8 @@ services:
       - "8082:8080"
     networks:
       - lifecare
+    volumes:
+      - ./crypto/hospital.lifecare.nl:/crypto
 
 networks:
   healpoint:

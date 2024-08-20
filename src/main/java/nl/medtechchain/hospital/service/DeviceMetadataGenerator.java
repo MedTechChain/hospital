@@ -3,7 +3,8 @@ package nl.medtechchain.hospital.service;
 import nl.medtechchain.hospital.dto.DeviceDataDTO;
 import nl.medtechchain.proto.devicedata.DeviceDataAsset;
 import nl.medtechchain.proto.devicedata.MedicalSpeciality;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -12,6 +13,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -19,25 +21,25 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 @Service
 public class DeviceMetadataGenerator {
 
-    private final String hospitalName;
+    private static final Logger logger = Logger.getLogger(DeviceMetadataGenerator.class.getName());
 
-    public DeviceMetadataGenerator(Environment env) {
-        this.hospitalName = env.getProperty("hospital.name");
-    }
+    @Value("${hospital.name}")
+    private String hospitalName;
 
-    @Scheduled(fixedRate = 2000)
+    @Scheduled(fixedRateString = "${hospital.generation-rate}")
     public void generateAndSendPayloads() {
         var client = RestClient.create();
 
-        System.out.println(generateRandomDeviceData());
-
-        String createDeviceDataEndpoint = "http://localhost:8080/api/create";
-        client.post()
+        String createDeviceDataEndpoint = "http://localhost:8080/api/device/create";
+        var response = client.post()
                 .uri(createDeviceDataEndpoint)
                 .contentType(APPLICATION_JSON)
                 .body(generateRandomDeviceData())
                 .retrieve()
-                .toBodilessEntity();
+                .toEntity(Object.class);
+
+        if (response.getStatusCode() == HttpStatus.CREATED)
+            logger.info("Generated device data asset");
     }
 
 
