@@ -67,8 +67,6 @@ public class DeviceMetadataController {
         if (hospital.isEmpty())
             throw new IllegalArgumentException("Invalid hospital name: " + deviceDataDTO.getHospital());
 
-        var hospitalIndex = hospitals.indexOf(hospital.get());
-
         var assetBuilder = DeviceDataAsset.newBuilder();
 
         assetBuilder.setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build());
@@ -97,12 +95,10 @@ public class DeviceMetadataController {
             assetBuilder.setEncryptionVersion(encryptionVersion.get());
 
             sensitiveDeviceDataBuilder
-                    .setUdi(encrypt(stringToBigInteger(deviceDataDTO.getUdi()), platformConfig))
-                    .setHospital(encrypt(BigInteger.valueOf(hospitalIndex), platformConfig))
-                    .setSpeciality(encrypt(BigInteger.valueOf(speciality.getNumber()), platformConfig));
+                    .setHospital(encrypt(stringToBigInteger(hospital.get().getName()), platformConfig))
+                    .setSpeciality(encrypt(stringToBigInteger(speciality.name()), platformConfig));
         } else
             sensitiveDeviceDataBuilder
-                    .setUdi(deviceDataDTO.getUdi())
                     .setHospital(hospital.get().getName())
                     .setSpeciality(deviceDataDTO.getSpeciality());
 
@@ -118,11 +114,17 @@ public class DeviceMetadataController {
 
 
     private String encrypt(BigInteger value, PlatformConfig platformConfig) {
+        var encryptionConfig = platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig();
+
         var client = RestClient.create();
 
-        switch (platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig().getSchemeCase()) {
+        switch (encryptionConfig.getSchemeCase()) {
             case PAILLIER:
-                var paillier = platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig().getPaillier();
+                var paillier = encryptionConfig.getPaillier();
+                var bound = BigInteger.valueOf(2).pow(paillier.getBitLength()).subtract(BigInteger.valueOf(1));
+                if (value.compareTo(bound) > 0)
+                    throw new IllegalArgumentException("Number exceeds encryption bound: " + bound);
+
                 var address = paillier.getTrustedThirdPartyAddress();
                 if (overrideTtpAddress != null)
                     address = overrideTtpAddress;
