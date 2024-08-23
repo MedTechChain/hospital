@@ -1,10 +1,11 @@
 package nl.medtechchain.hospital.service;
 
-import com.google.protobuf.InvalidProtocolBufferException;
 import jakarta.annotation.PreDestroy;
-import nl.medtechchain.proto.config.ReadPlatformConfigResponse;
+import nl.medtechchain.hospital.util.PlatformConfig;
+import nl.medtechchain.proto.common.ChaincodeResponse;
 import nl.medtechchain.proto.devicedata.DeviceDataAsset;
 import org.hyperledger.fabric.client.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,9 @@ import java.util.logging.Logger;
 
 @Service
 public class ChaincodeService {
+
+    @Value("${hospital.override-ttp-address:#{null}}")
+    private String overrideTtpAddress;
 
     private static final Logger logger = Logger.getLogger(ChaincodeService.class.getName());
 
@@ -30,12 +34,21 @@ public class ChaincodeService {
                 env.getProperty("gateway.config-contract-name"));
     }
 
-    public ReadPlatformConfigResponse getPlatformConfig() {
+    public PlatformConfig getPlatformConfig() {
         try {
-            var responseBytes = configContract.evaluateTransaction("GetPlatformConfig");
-            return ReadPlatformConfigResponse.parseFrom(Base64.getDecoder().decode(new String(responseBytes)));
-        } catch (GatewayException | InvalidProtocolBufferException e) {
-            logger.severe("Cannot retrieve platform config: " + e.getMessage());
+            var response = configContract.evaluateTransaction("GetPlatformConfig");
+            var chaincodeResponse = ChaincodeResponse.parseFrom(Base64.getDecoder().decode(response));
+            if (chaincodeResponse.getChaincodeResponseCase() == ChaincodeResponse.ChaincodeResponseCase.SUCCESS) {
+                return new PlatformConfig(nl.medtechchain.proto.config.PlatformConfig.parseFrom(Base64.getDecoder().decode(chaincodeResponse.getSuccess().getMessage())));
+            }
+
+            if (chaincodeResponse.getChaincodeResponseCase() == ChaincodeResponse.ChaincodeResponseCase.ERROR)
+                throw new IllegalStateException(chaincodeResponse.getError().toString());
+
+            throw new IllegalStateException("Unrecognized chaincode response");
+
+        } catch (Throwable e) {
+            logger.severe("Cannot retrieve platform config: " + e);
             throw new IllegalStateException("Cannot retrieve platform config:", e);
         }
     }

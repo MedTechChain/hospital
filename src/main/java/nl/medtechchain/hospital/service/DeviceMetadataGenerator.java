@@ -1,9 +1,8 @@
 package nl.medtechchain.hospital.service;
 
 import nl.medtechchain.hospital.dto.DeviceDataDTO;
-import nl.medtechchain.proto.devicedata.DeviceDataAsset;
+import nl.medtechchain.proto.devicedata.DeviceCategory;
 import nl.medtechchain.proto.devicedata.MedicalSpeciality;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -22,9 +21,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 public class DeviceMetadataGenerator {
 
     private static final Logger logger = Logger.getLogger(DeviceMetadataGenerator.class.getName());
-
-    @Value("${hospital.name}")
-    private String hospitalName;
 
     @Scheduled(fixedRateString = "${hospital.generation-rate}")
     public void generateAndSendPayloads() {
@@ -47,7 +43,6 @@ public class DeviceMetadataGenerator {
         var random = ThreadLocalRandom.current();
         return new DeviceDataDTO(
                 UUID.randomUUID().toString(),
-                hospitalName,
                 getRandomSpeciality().name(),
                 getRandomManufacturer(),
                 getRandomModel(),
@@ -57,11 +52,11 @@ public class DeviceMetadataGenerator {
                 OffsetDateTime.now().minusDays(random.nextInt(365)),
                 OffsetDateTime.now().minusDays(random.nextInt(180)),
                 OffsetDateTime.now().plusDays(random.nextInt(365)),
+                OffsetDateTime.now().minusMinutes(random.nextInt(10)),
                 random.nextInt(10000),
                 random.nextInt(101),
-                random.nextBoolean(),
-                OffsetDateTime.now().minusMinutes(random.nextInt(10)),
-                String.valueOf(random.nextInt(3600))
+                random.nextInt(3600),
+                random.nextBoolean()
         );
     }
 
@@ -96,8 +91,8 @@ public class DeviceMetadataGenerator {
     }
 
 
-    private DeviceDataAsset.DeviceCategory getRandomDeviceCategory() {
-        return getRandomElement(Stream.of(DeviceDataAsset.DeviceCategory.values()).filter(s -> s != DeviceDataAsset.DeviceCategory.UNRECOGNIZED && s != DeviceDataAsset.DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED).toList());
+    private DeviceCategory getRandomDeviceCategory() {
+        return getRandomElement(Stream.of(DeviceCategory.values()).filter(s -> s != DeviceCategory.UNRECOGNIZED && s != DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED).toList());
     }
 
     private MedicalSpeciality getRandomSpeciality() {

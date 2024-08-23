@@ -2,10 +2,9 @@ package nl.medtechchain.hospital.controller;
 
 import com.google.protobuf.Timestamp;
 import nl.medtechchain.hospital.dto.DeviceDataDTO;
-import nl.medtechchain.hospital.dto.encrypt.EncryptRequest;
-import nl.medtechchain.hospital.dto.encrypt.EncryptResponse;
 import nl.medtechchain.hospital.service.ChaincodeService;
-import nl.medtechchain.proto.config.PlatformConfig;
+import nl.medtechchain.hospital.service.encryption.PlatformEncryption;
+import nl.medtechchain.proto.devicedata.DeviceCategory;
 import nl.medtechchain.proto.devicedata.DeviceDataAsset;
 import nl.medtechchain.proto.devicedata.MedicalSpeciality;
 import org.hyperledger.fabric.client.CommitException;
@@ -16,25 +15,22 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestClient;
 
-import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.logging.Logger;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static nl.medtechchain.proto.config.PlatformConfig.Config.CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_TTP_ADRRESS;
 
 @RestController
 @RequestMapping("/api/device")
 public class DeviceMetadataController {
 
-    @Value("${hospital.override-ttp-address:#{null}}")
-    private String overrideTtpAddress;
+    @Value("${hospital.override-paillier-ttp-address:#{null}}")
+    private String overridePaillierTtpAddress;
 
-    private static final Logger logger = Logger.getLogger(DeviceMetadataController.class.getName());
+    @Value("${hospital.name}")
+    private String hospitalName;
 
     private final ChaincodeService chaincodeService;
 
@@ -45,64 +41,50 @@ public class DeviceMetadataController {
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> addPortableDevice(@RequestBody DeviceDataDTO deviceDataDTO) throws EndorseException, CommitException, SubmitException, CommitStatusException {
-        var readPlatformConfigResponse = chaincodeService.getPlatformConfig();
+        var platformConfig = chaincodeService.getPlatformConfig();
 
-        var platformConfig = readPlatformConfigResponse.getPlatformConfig();
-        Optional<String> encryptionVersion;
-        if (readPlatformConfigResponse.hasEncryptionVersion())
-            encryptionVersion = Optional.of(readPlatformConfigResponse.getEncryptionVersion());
-        else
-            encryptionVersion = Optional.empty();
+        if (overridePaillierTtpAddress != null)
+            platformConfig.override(CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_TTP_ADRRESS, overridePaillierTtpAddress);
 
-        var category = DeviceDataAsset.DeviceCategory.valueOf(deviceDataDTO.getDeviceCategory());
-        if (category == DeviceDataAsset.DeviceCategory.UNRECOGNIZED || category == DeviceDataAsset.DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED)
+        var encryptionScheme = PlatformEncryption.get(platformConfig);
+
+        var category = DeviceCategory.valueOf(deviceDataDTO.getDeviceCategory());
+        if (category == DeviceCategory.UNRECOGNIZED || category == DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED)
             throw new IllegalArgumentException("Invalid device data category: " + category);
 
         var speciality = MedicalSpeciality.valueOf(deviceDataDTO.getSpeciality());
         if (speciality == MedicalSpeciality.UNRECOGNIZED || speciality == MedicalSpeciality.MEDICAL_SPECIALITY_UNSPECIFIED)
             throw new IllegalArgumentException("Invalid medical speciality: " + speciality);
 
-        var hospitals = platformConfig.getParticipantConfig().getHospitalsConfigList();
-        var hospital = hospitals.stream().filter(h -> h.getName().equals(deviceDataDTO.getHospital())).findFirst();
-        if (hospital.isEmpty())
-            throw new IllegalArgumentException("Invalid hospital name: " + deviceDataDTO.getHospital());
-
         var assetBuilder = DeviceDataAsset.newBuilder();
 
         assetBuilder.setTimestamp(Timestamp.newBuilder().setSeconds(Instant.now().getEpochSecond()).build());
-        assetBuilder.setPlainDeviceData(
-                DeviceDataAsset.PlainDeviceData
-                        .newBuilder()
-                        .setManufacturer(deviceDataDTO.getManufacturer())
-                        .setModel(deviceDataDTO.getModel())
-                        .setFirmwareVersion(deviceDataDTO.getFirmwareVersion())
-                        .setDeviceType(deviceDataDTO.getDeviceType())
-                        .setDeviceCategory(category)
-                        .setProductionDate(Timestamp.newBuilder().setSeconds(deviceDataDTO.getProductionDate().toInstant().getEpochSecond()).build())
-                        .setLastServiceDate(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastServiceDate().toInstant().getEpochSecond()).build())
-                        .setWarrantyExpiryDate(Timestamp.newBuilder().setSeconds(deviceDataDTO.getWarrantyExpiryDate().toInstant().getEpochSecond()).build())
-                        .setUsageHours(deviceDataDTO.getUsageHours())
-                        .setBatteryLevel(deviceDataDTO.getBatteryLevel())
-                        .setActiveStatus(deviceDataDTO.isActiveStatus())
-                        .setLastSyncTime(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastSyncTime().toInstant().getEpochSecond()).build())
-                        .setSyncFrequencySeconds(deviceDataDTO.getSyncFrequencySeconds())
-                        .build()
-        );
+        assetBuilder.setConfigId(platformConfig.getId());
 
-        DeviceDataAsset.SensitiveDeviceData.Builder sensitiveDeviceDataBuilder = DeviceDataAsset.SensitiveDeviceData.newBuilder();
+        var deviceDataBuilder = DeviceDataAsset.DeviceData.newBuilder();
+        deviceDataBuilder.setManufacturer(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getManufacturer()).build());
+        deviceDataBuilder.setModel(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getModel()).build());
+        deviceDataBuilder.setFirmwareVersion(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getFirmwareVersion()).build());
+        deviceDataBuilder.setDeviceType(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getDeviceType()).build());
+        deviceDataBuilder.setCategory(DeviceDataAsset.DeviceCateogryField.newBuilder().setPlain(category).getDefaultInstanceForType());
+        deviceDataBuilder.setProductionDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getProductionDate().toInstant().getEpochSecond()).build()).build());
+        deviceDataBuilder.setLastServiceDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastServiceDate().toInstant().getEpochSecond()).build()).build());
+        deviceDataBuilder.setWarrantyExpiryDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getWarrantyExpiryDate().toInstant().getEpochSecond()).build()).build());
+        deviceDataBuilder.setLastSyncTime(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastSyncTime().toInstant().getEpochSecond()).build()).build());
+        deviceDataBuilder.setUsageHours(DeviceDataAsset.IntegerField.newBuilder().setPlain(deviceDataDTO.getUsageHours()).build());
+        deviceDataBuilder.setBatteryLevel(DeviceDataAsset.IntegerField.newBuilder().setPlain(deviceDataDTO.getBatteryLevel()).build());
+        deviceDataBuilder.setSyncFrequencySeconds(DeviceDataAsset.IntegerField.newBuilder().setPlain(deviceDataDTO.getSyncFrequencySeconds()).build());
+        deviceDataBuilder.setActiveStatus(DeviceDataAsset.BoolField.newBuilder().setPlain(deviceDataDTO.isActiveStatus()).build());
 
-        if (encryptionVersion.isPresent()) {
-            assetBuilder.setEncryptionVersion(encryptionVersion.get());
+        if (encryptionScheme.isPresent()) {
+            deviceDataBuilder.setHospital(DeviceDataAsset.StringField.newBuilder().setEncrypted(encryptionScheme.get().encryptString(hospitalName)).build());
+            deviceDataBuilder.setSpeciality(DeviceDataAsset.MedicalSpecialityField.newBuilder().setEncrypted(encryptionScheme.get().encryptLong(speciality.getNumber())).build());
+        } else {
+            deviceDataBuilder.setHospital(DeviceDataAsset.StringField.newBuilder().setPlain(hospitalName).build());
+            deviceDataBuilder.setSpeciality(DeviceDataAsset.MedicalSpecialityField.newBuilder().setPlain(speciality).build());
+        }
 
-            sensitiveDeviceDataBuilder
-                    .setHospital(encrypt(stringToBigInteger(hospital.get().getName()), platformConfig))
-                    .setSpeciality(encrypt(stringToBigInteger(speciality.name()), platformConfig));
-        } else
-            sensitiveDeviceDataBuilder
-                    .setHospital(hospital.get().getName())
-                    .setSpeciality(deviceDataDTO.getSpeciality());
-
-        assetBuilder.setSensitiveDeviceData(sensitiveDeviceDataBuilder.build());
+        assetBuilder.setDeviceData(deviceDataBuilder.build());
 
         var id = UUID.nameUUIDFromBytes(deviceDataDTO.getUdi().getBytes(StandardCharsets.UTF_8)).toString();
         var asset = assetBuilder.build();
@@ -110,49 +92,5 @@ public class DeviceMetadataController {
         chaincodeService.storeDeviceData(id, asset);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-
-    private String encrypt(BigInteger value, PlatformConfig platformConfig) {
-        var encryptionConfig = platformConfig.getFeatureConfig().getQueryConfig().getEncryptionConfig();
-
-        var client = RestClient.create();
-
-        switch (encryptionConfig.getSchemeCase()) {
-            case PAILLIER:
-                var paillier = encryptionConfig.getPaillier();
-                var bound = BigInteger.valueOf(2).pow(paillier.getBitLength()).subtract(BigInteger.valueOf(1));
-                if (value.compareTo(bound) > 0)
-                    throw new IllegalArgumentException("Number exceeds encryption bound: " + bound);
-
-                var address = paillier.getTrustedThirdPartyAddress();
-                if (overrideTtpAddress != null)
-                    address = overrideTtpAddress;
-
-                long startTime = System.nanoTime();
-
-                EncryptResponse encryptResponse = client.post()
-                        .uri("http://" + address + "/api/paillier/encrypt")
-                        .contentType(APPLICATION_JSON)
-                        .body(new EncryptRequest(paillier.getPublicKey(), value.toString()))
-                        .retrieve()
-                        .body(EncryptResponse.class);
-
-                long endTime = System.nanoTime();
-
-                long durationInMillis = (endTime - startTime) / 1_000_000;
-                logger.info("Encryption request time: " + durationInMillis + " ms");
-
-                assert encryptResponse != null;
-                return encryptResponse.getCiphertext();
-            default:
-                logger.severe("Encryption scheme not set in config when encryption version is present");
-                throw new IllegalStateException("Encryption scheme not set in config when encryption version is present");
-        }
-    }
-
-    private BigInteger stringToBigInteger(String s) {
-        byte[] bytes = s.getBytes(StandardCharsets.UTF_8);
-        return new BigInteger(1, bytes);  // 1 indicates positive number
     }
 }

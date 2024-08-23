@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 public class DeviceDataDTO {
 
     private String udi;
-    private String hospital;
     private String speciality;
     private String manufacturer;
     private String model;
@@ -22,9 +21,9 @@ public class DeviceDataDTO {
     private OffsetDateTime productionDate;
     private OffsetDateTime lastServiceDate;
     private OffsetDateTime warrantyExpiryDate;
+    private OffsetDateTime lastSyncTime;
     private int usageHours;
     private int batteryLevel;
+    private int syncFrequencySeconds;
     private boolean activeStatus;
-    private OffsetDateTime lastSyncTime;
-    private String syncFrequencySeconds;
 }
