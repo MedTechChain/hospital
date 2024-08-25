@@ -1,7 +1,7 @@
 package nl.medtechchain.hospital.service;
 
 import jakarta.annotation.PreDestroy;
-import nl.medtechchain.hospital.util.PlatformConfig;
+import nl.medtechchain.hospital.util.PlatformConfigWrapper;
 import nl.medtechchain.proto.common.ChaincodeResponse;
 import nl.medtechchain.proto.devicedata.DeviceDataAsset;
 import org.hyperledger.fabric.client.*;
@@ -34,12 +34,12 @@ public class ChaincodeService {
                 env.getProperty("gateway.config-contract-name"));
     }
 
-    public PlatformConfig getPlatformConfig() {
+    public PlatformConfigWrapper getPlatformConfig() {
         try {
             var response = configContract.evaluateTransaction("GetPlatformConfig");
             var chaincodeResponse = ChaincodeResponse.parseFrom(Base64.getDecoder().decode(response));
             if (chaincodeResponse.getChaincodeResponseCase() == ChaincodeResponse.ChaincodeResponseCase.SUCCESS) {
-                return new PlatformConfig(nl.medtechchain.proto.config.PlatformConfig.parseFrom(Base64.getDecoder().decode(chaincodeResponse.getSuccess().getMessage())));
+                return new PlatformConfigWrapper(nl.medtechchain.proto.config.PlatformConfig.parseFrom(Base64.getDecoder().decode(chaincodeResponse.getSuccess().getMessage())));
             }
 
             if (chaincodeResponse.getChaincodeResponseCase() == ChaincodeResponse.ChaincodeResponseCase.ERROR)

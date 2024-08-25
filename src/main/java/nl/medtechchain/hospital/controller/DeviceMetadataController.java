@@ -3,7 +3,7 @@ package nl.medtechchain.hospital.controller;
 import com.google.protobuf.Timestamp;
 import nl.medtechchain.hospital.dto.DeviceDataDTO;
 import nl.medtechchain.hospital.service.ChaincodeService;
-import nl.medtechchain.hospital.service.encryption.PlatformEncryption;
+import nl.medtechchain.hospital.service.encryption.PlatformEncryptionInterface;
 import nl.medtechchain.proto.devicedata.DeviceCategory;
 import nl.medtechchain.proto.devicedata.DeviceDataAsset;
 import nl.medtechchain.proto.devicedata.MedicalSpeciality;
@@ -46,7 +46,7 @@ public class DeviceMetadataController {
         if (overridePaillierTtpAddress != null)
             platformConfig.override(CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_TTP_ADRRESS, overridePaillierTtpAddress);
 
-        var encryptionScheme = PlatformEncryption.get(platformConfig);
+        var encryptionScheme = PlatformEncryptionInterface.Factory.getInstance(platformConfig);
 
         var category = DeviceCategory.valueOf(deviceDataDTO.getDeviceCategory());
         if (category == DeviceCategory.UNRECOGNIZED || category == DeviceCategory.DEVICE_CATEGORY_UNSPECIFIED)
@@ -66,7 +66,7 @@ public class DeviceMetadataController {
         deviceDataBuilder.setModel(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getModel()).build());
         deviceDataBuilder.setFirmwareVersion(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getFirmwareVersion()).build());
         deviceDataBuilder.setDeviceType(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getDeviceType()).build());
-        deviceDataBuilder.setCategory(DeviceDataAsset.DeviceCateogryField.newBuilder().setPlain(category).getDefaultInstanceForType());
+        deviceDataBuilder.setCategory(DeviceDataAsset.DeviceCategoryField.newBuilder().setPlain(category).getDefaultInstanceForType());
         deviceDataBuilder.setProductionDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getProductionDate().toInstant().getEpochSecond()).build()).build());
         deviceDataBuilder.setLastServiceDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastServiceDate().toInstant().getEpochSecond()).build()).build());
         deviceDataBuilder.setWarrantyExpiryDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getWarrantyExpiryDate().toInstant().getEpochSecond()).build()).build());

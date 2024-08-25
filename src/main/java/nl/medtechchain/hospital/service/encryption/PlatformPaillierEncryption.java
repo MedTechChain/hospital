@@ -2,26 +2,23 @@ package nl.medtechchain.hospital.service.encryption;
 
 import nl.medtechchain.hospital.service.encryption.paillier.dto.PaillierEncryptRequest;
 import nl.medtechchain.hospital.service.encryption.paillier.dto.PaillierEncryptResponse;
-import nl.medtechchain.hospital.util.PlatformConfig;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 
-import static nl.medtechchain.proto.config.PlatformConfig.Config.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-public class PaillierEncryption extends PlatformEncryption {
+public class PlatformPaillierEncryption implements PlatformEncryptionInterface {
 
     private final int bitLength;
     private final BigInteger publicKey;
     private final String ttpAddress;
 
-    PaillierEncryption(PlatformConfig platformConfig) {
-        super(platformConfig);
-        this.bitLength = Integer.parseInt(platformConfig.getUnsafe(CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_BIT_LENGTH));
-        this.publicKey = new BigInteger(platformConfig.getUnsafe(CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_PUBLIC_KEY));
-        this.ttpAddress = platformConfig.getUnsafe(CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_TTP_ADRRESS);
+    PlatformPaillierEncryption(int bitLength, BigInteger publicKey, String ttpAddress) {
+        this.bitLength = bitLength;
+        this.publicKey = publicKey;
+        this.ttpAddress = ttpAddress;
     }
 
     @Override
@@ -41,6 +38,8 @@ public class PaillierEncryption extends PlatformEncryption {
         return encrypt(BigInteger.ZERO).toString();
     }
 
+    // This could be replaced by performing the encryption on the hospital side
+    // This is performed to ease development
     private BigInteger encrypt(BigInteger value) {
         var client = RestClient.create();
 

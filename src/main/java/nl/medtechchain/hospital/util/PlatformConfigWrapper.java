@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class PlatformConfig {
+public class PlatformConfigWrapper {
 
     @Getter
     private final String id;
     private final Map<nl.medtechchain.proto.config.PlatformConfig.Config, String> map;
 
-    public PlatformConfig(nl.medtechchain.proto.config.PlatformConfig configs) {
+    public PlatformConfigWrapper(nl.medtechchain.proto.config.PlatformConfig configs) {
         this.id = configs.getId();
 
         this.map = new HashMap<>();
