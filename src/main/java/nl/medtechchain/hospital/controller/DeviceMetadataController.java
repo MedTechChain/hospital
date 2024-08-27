@@ -19,12 +19,15 @@ import org.springframework.web.bind.annotation.*;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import static nl.medtechchain.proto.config.PlatformConfig.Config.CONFIG_FEATURE_QUERY_ENCRYPTION_PAILLIER_TTP_ADRRESS;
 
 @RestController
 @RequestMapping("/api/device")
 public class DeviceMetadataController {
+
+    private final Logger logger = Logger.getLogger(DeviceMetadataController.class.getName());
 
     @Value("${hospital.override-paillier-ttp-address:#{null}}")
     private String overridePaillierTtpAddress;
@@ -66,7 +69,7 @@ public class DeviceMetadataController {
         deviceDataBuilder.setModel(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getModel()).build());
         deviceDataBuilder.setFirmwareVersion(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getFirmwareVersion()).build());
         deviceDataBuilder.setDeviceType(DeviceDataAsset.StringField.newBuilder().setPlain(deviceDataDTO.getDeviceType()).build());
-        deviceDataBuilder.setCategory(DeviceDataAsset.DeviceCategoryField.newBuilder().setPlain(category).getDefaultInstanceForType());
+        deviceDataBuilder.setCategory(DeviceDataAsset.DeviceCategoryField.newBuilder().setPlain(category).build());
         deviceDataBuilder.setProductionDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getProductionDate().toInstant().getEpochSecond()).build()).build());
         deviceDataBuilder.setLastServiceDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getLastServiceDate().toInstant().getEpochSecond()).build()).build());
         deviceDataBuilder.setWarrantyExpiryDate(DeviceDataAsset.TimestampField.newBuilder().setPlain(Timestamp.newBuilder().setSeconds(deviceDataDTO.getWarrantyExpiryDate().toInstant().getEpochSecond()).build()).build());
@@ -90,6 +93,8 @@ public class DeviceMetadataController {
         var asset = assetBuilder.build();
 
         chaincodeService.storeDeviceData(id, asset);
+
+        logger.info("Stored: " + asset);
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }

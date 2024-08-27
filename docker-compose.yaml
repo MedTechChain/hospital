@@ -10,7 +10,7 @@ services:
       CHANNEL_NAME: medtechchain
       CHAINCODE_NAME: medtechchain
       DEVICE_DATA_CONTRACT_NAME: devicedata
-      CONFIG_CONTRACT_NAME: platformconfig
+      CONFIG_CONTRACT_NAME: config
       CRYPTO_PATH: /crypto
       CERT_DIR_PATH: ./msp/signcerts
       KEY_DIR_PATH: ./msp/keystore
